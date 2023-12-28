@@ -2,3 +2,5 @@ megaavr/tools/python3/*
 *.pyc
 *.pyc
 .DS_Store
+
+SparkEVO-ArduinoCore-tinyAVR-*.tar.gz
