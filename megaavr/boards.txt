@@ -162,6 +162,14 @@ sparkevo_rpmdot.menu.chip.414.build.mrelax=
 sparkevo_rpmdot.menu.chip.414.upload.maximum_data_size=256
 sparkevo_rpmdot.menu.chip.414.bootloader.TCD0CFG_avrdude="-Ufuse4:w:0x00:m"
 sparkevo_rpmdot.menu.chip.414.bootloader.TCD0CFG_serialupdi=4:0x00
+sparkevo_rpmdot.menu.chip.814=ATtiny814
+sparkevo_rpmdot.menu.chip.814.build.board=AVR_ATtiny814
+sparkevo_rpmdot.menu.chip.814.build.attiny=814
+sparkevo_rpmdot.menu.chip.814.upload.maximum_size=8192
+sparkevo_rpmdot.menu.chip.814.build.mrelax=
+sparkevo_rpmdot.menu.chip.814.upload.maximum_data_size=512
+sparkevo_rpmdot.menu.chip.814.bootloader.TCD0CFG_avrdude="-Ufuse4:w:0x00:m"
+sparkevo_rpmdot.menu.chip.814.bootloader.TCD0CFG_serialupdi=4:0x00
 
 #----------------------------------------#
 # CLOCK SOURCE                           #
