@@ -96,6 +96,10 @@
 
 #if MEGATINYCORE_SERIES < 2
   /* ADC constants for 0/1-series */
+  #define _ADC_ENABLE_VAL   0x10
+  #define _ADC_ENABLE_CTRL  0x20
+  #define _ADC_STANDBY_VAL  0X40
+  #define _ADC_STANDBY_CTRL 0x80
   #define LOW_LAT_ON      badArg("This option is on 2-series tiny and AVR Ex-series only")
   #define LOW_LAT_OFF     badArg("This option is on 2-series tiny and AVR Ex-series only")
   #define ADC_LOWLAT_ON   badArg("This option is on 2-series tiny and AVR Ex-series only")
@@ -103,10 +107,10 @@
   #define PGA_KEEP_ON     badArg("This option is on 2-series tiny and AVR Ex-series only")
   #define PGA_AUTO_OFF    badArg("This option is on 2-series tiny and AVR Ex-series only")
   #define PGA_OFF_ONCE    badArg("This option is on 2-series tiny and AVR Ex-series only")
-  #define ADC_ENABLE      0x20
-  #define ADC_DISABLE     0x30
-  #define ADC_STANDBY_ON  0xC0
-  #define ADC_STANDBY_OFF 0x80
+  #define ADC_ENABLE        _ADC_ENABLE_CTRL  | _ADC_ENABLE_VAL
+  #define ADC_DISABLE       _ADC_ENABLE_CTRL
+  #define ADC_STANDBY_ON    _ADC_STANDBY_CTRL | _ADC_STANDBY_VAL
+  #define ADC_STANDBY_OFF   _ADC_STANDBY_CTRL
   #define INTERNAL0V55    (VREF_ADC0REFSEL_0V55_gc >> VREF_ADC0REFSEL_gp)
   #define INTERNAL1V1     (VREF_ADC0REFSEL_1V1_gc >> VREF_ADC0REFSEL_gp)
   #define INTERNAL2V5     (VREF_ADC0REFSEL_2V5_gc >> VREF_ADC0REFSEL_gp)
@@ -207,19 +211,24 @@
   #define ADC_ACC512S     badArg("Sign chopping is only supported on Ex-series")
   #define ADC_ACC1024S    badArg("Sign chopping is only supported on Ex-series")
 
-  #define LOW_LAT_ON      0x03 // deprecated
-  #define LOW_LAT_OFF     0x02 // deprecated
-  #define ADC_LOWLAT_ON   0x03
-  #define ADC_LOWLAT_OFF  0x02
-  #define PGA_KEEP_ON     0x08
-  #define PGA_AUTO_OFF    0x0C
-  #define PGA_OFF_ONCE    0x04
-  #define ADC_ENABLE      0x20
-  #define ADC_DISABLE     0x30
-  #define ADC_STANDBY_ON  0xC0
-  #define ADC_STANDBY_OFF 0x80
-
-
+  #define _PGA_CFG_MASK     0x03
+  #define _ADC_LOWLAT_CTRL  0x08
+  #define _ADC_LOWLAT_VAL   0x04
+  #define _ADC_ENABLE_VAL   0x10
+  #define _ADC_ENABLE_CTRL  0x20
+  #define _ADC_STANDBY_VAL  0X40
+  #define _ADC_STANDBY_CTRL 0x80
+  #define PGA_OFF_ONCE      0x01
+  #define PGA_KEEP_ON       0x02
+  #define PGA_AUTO_OFF      0x03
+  #define LOW_LAT_ON        _ADC_LOWLAT_CTRL  | _ADC_LOWLAT_VAL// deprecated
+  #define LOW_LAT_OFF       _ADC_LOWLAT_CTRL// deprecated
+  #define ADC_LOWLAT_ON     _ADC_LOWLAT_CTRL  | _ADC_LOWLAT_VAL
+  #define ADC_LOWLAT_OFF    _ADC_LOWLAT_CTRL
+  #define ADC_ENABLE        _ADC_ENABLE_CTRL  | _ADC_ENABLE_VAL
+  #define ADC_DISABLE       _ADC_ENABLE_CTRL
+  #define ADC_STANDBY_ON    _ADC_STANDBY_CTRL | _ADC_STANDBY_VAL
+  #define ADC_STANDBY_OFF   _ADC_STANDBY_CTRL
 #endif
 
 /* Errors in analogReadEnh and analogReadDiff are large negative numbers,
@@ -444,9 +453,9 @@ uint8_t PWMoutputTopin(uint8_t timer, uint8_t channel);
  * 3/19/23: These are supposed to be macros, not inline functions
  * Users have reported problems resulting from their being functions, even inline ones
  */
-#define clockCyclesPerMicrosecond()       ((F_CPU / 1000000UL))
-#define clockCyclesToMicroseconds(__a__)  (__a__ / clockCyclesPerMicrosecond())
-#define microsecondsToClockCycles(__a__)  (__a__ * clockCyclesPerMicrosecond())
+#define clockCyclesPerMicrosecond()      ((uint16_t)(F_CPU / 1000000UL))
+#define clockCyclesToMicroseconds(__a__) ((uint32_t)((__a__) / clockCyclesPerMicrosecond()))
+#define microsecondsToClockCycles(__a__) ((uint32_t)((__a__) * clockCyclesPerMicrosecond()))
 
 // Currently DxCore has no cases where the millis timer isn't derived from system clock, but that will change
 /* This becomes important when we support other timers for timekeeping. The Type D timer can be faster, requiring:
@@ -474,15 +483,15 @@ uint32_t microsecondsToMillisClockCycles(uint32_t microseconds);
  */
 #ifdef MILLIS_USE_TIMERD0
   #if (F_CPU == 20000000UL || F_CPU == 10000000UL ||F_CPU == 5000000UL)
-    #define millisClockCyclesPerMicrosecond() (20)  // this always runs off the 20MHz oscillator
+    #define millisClockCyclesPerMicrosecond() ((uint16_t)(20)) // this always runs off the 20MHz oscillator
   #else
-    #define millisClockCyclesPerMicrosecond() (16)
+    #define millisClockCyclesPerMicrosecond() ((uint16_t)(16))
   #endif
 #else
-  #define millisClockCyclesPerMicrosecond() (F_CPU / 1000000UL)
+  #define millisClockCyclesPerMicrosecond() ((uint16_t)((F_CPU / 1000000UL)))
 #endif
-#define millisClockCyclesToMicroseconds(__a__) (__a__ / millisClockCyclesPerMicrosecond())
-#define microsecondsToMillisClockCycles(__a__) (__a__ * millisClockCyclesPerMicrosecond())
+#define millisClockCyclesToMicroseconds(__a__) ((uint32_t)(__a__ / millisClockCyclesPerMicrosecond()))
+#define microsecondsToMillisClockCycles(__a__) ((uint32_t)(__a__ * millisClockCyclesPerMicrosecond()))
 
 /* Timers and Timer-like-things
  * These are used for two things: Identifying the timer on a pin in
